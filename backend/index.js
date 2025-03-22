@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const axios = require("axios"); // Make sure to import axios
 const {
   TranscribeStreamingClient,
   StartStreamTranscriptionCommand,
@@ -18,6 +19,9 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 app.use(
   cors({
@@ -92,6 +96,36 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
     isTranscribing = false;
   });
+});
+
+// ChatGPT integration
+app.post("/api/chat", async (req, res) => {
+  const { message } = req.body;
+  console.log("******** checking message:", req.body);
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: message }],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    // Forward the ChatGPT response to the frontend
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      "Error calling ChatGPT API:",
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({ error: "Error processing the request" });
+  }
 });
 
 const PORT = process.env.PORT || 5002;
