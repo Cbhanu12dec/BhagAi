@@ -15,7 +15,7 @@ dotenv.config();
 
 const rawData = fs.readFileSync("prompt.json", "utf8");
 const data = JSON.parse(rawData);
-const interviewPrompt = data.interviewPrompt;
+const interviewPrompt = data.instruction;
 
 const app = express();
 const server = http.createServer(app);

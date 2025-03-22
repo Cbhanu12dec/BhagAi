@@ -70,7 +70,7 @@ function ChatComponent() {
       {chatResponse && (
         <div className="mt-5">
           <p className="font-bold">Question: {message}</p>
-          <div className="mt-2 p-4 bg-gray-100 rounded">
+          <div className="mt-2 p-4 bg-gray-100 rounded h-[75vh] overflow-y-auto">
             {/* <p>{chatResponse}</p> */}
             <ReactMarkdown>{chatResponse}</ReactMarkdown>
           </div>
