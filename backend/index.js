@@ -1,7 +1,9 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const axios = require("axios"); // Make sure to import axios
+const axios = require("axios");
+const fs = require("fs");
+
 const {
   TranscribeStreamingClient,
   StartStreamTranscriptionCommand,
@@ -10,6 +12,10 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 
 dotenv.config();
+
+const rawData = fs.readFileSync("prompt.json", "utf8");
+const data = JSON.parse(rawData);
+const interviewPrompt = data.interviewPrompt;
 
 const app = express();
 const server = http.createServer(app);
@@ -20,7 +26,6 @@ const io = new Server(server, {
   },
 });
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
 app.use(
@@ -107,7 +112,18 @@ app.post("/api/chat", async (req, res) => {
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }],
+        messages: [
+          { role: "user", content: message },
+          {
+            role: "system",
+            content: interviewPrompt,
+          },
+        ],
+        max_tokens: 2000, // adjust this value to suit your needs
+        temperature: 0.5,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
       },
       {
         headers: {

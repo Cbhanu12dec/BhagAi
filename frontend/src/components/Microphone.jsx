@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { motion } from "framer-motion";
 import io from "socket.io-client";
+import { AppContext } from "./AppContext";
 
 const socket = io(`${import.meta.env.VITE_SOCKET_URL}`, {
   transports: ["websocket", "polling"],
@@ -13,10 +14,13 @@ const Microphone = () => {
   const audioContextRef = useRef(null);
   const audioInputRef = useRef(null);
   const processorRef = useRef(null);
+  const { setSpeechText } = useContext(AppContext);
 
   useEffect(() => {
     socket.on("transcription", (data) => {
       setTranscript(data?.text);
+      console.log("Transcription:", data?.text);
+      setSpeechText(data?.text);
     });
     socket.on("error", (errorMessage) => {
       console.error("Server error:", errorMessage);
